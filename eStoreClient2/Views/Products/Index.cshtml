@@ -61,6 +61,7 @@
                         { "data": null, render: function(data, type, row) {
                             var chuoi = '<button class="btn btn-primary" onclick="addProduct(' + row.productId + ')">Add To Cart</button>';
                             if (userrole=='admin'){
+                                chuoi += ' <a class="btn btn-success" href="https://localhost:44332/Products/Edit/'+row.productId+'">Edit</a>';
                                 chuoi += ' <button class="btn btn-danger" onclick="deleteProduct(' + row.productId + ')">Delete</button>';
                             }
                             return chuoi;
