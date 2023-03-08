@@ -79,9 +79,9 @@ namespace eStoreAPI.Controllers
             return true;
         }
 
-        // Khang - Post: AddProductToCart
+        // AddProductToCart
         [HttpPost("AddProductToCart")]
-        public async Task<IActionResult> AddCart([FromBody] Cart cart)
+        public IActionResult AddCart([FromBody] Cart cart)
         {
             var oldCart = repository.FindCartByUserIdAndProductId(cart.MemberId, cart.ProductId);
 
@@ -108,7 +108,7 @@ namespace eStoreAPI.Controllers
 
         // GET: api/Carts/5
         [HttpGet("GetCartsUser/{userId}")]
-        public async Task<ActionResult<List<Cart>>> GetCartsUser(string userId)
+        public ActionResult<List<Cart>> GetCartsUser(string userId)
         {
             var carts = repository.GetCartsByUserId(userId);
 

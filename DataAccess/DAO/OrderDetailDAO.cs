@@ -1,4 +1,5 @@
 ﻿using BusinessObject;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    list = context.OrderDetails.ToList();
+                    list = context.OrderDetails.Include(x => x.Product).Include(x=>x.Order).ToList();
                 }
             }
             catch (Exception ex)
@@ -33,7 +34,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    order = context.OrderDetails.SingleOrDefault(x => x.OrderId == orderId && x.ProductId == productId);
+                    order = context.OrderDetails.Include(x => x.Product).Include(x => x.Order).SingleOrDefault(x => x.OrderId == orderId && x.ProductId == productId);
                 }
             }
             catch (Exception ex)
@@ -81,7 +82,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    var x = context.OrderDetails.SingleOrDefault(x => x.OrderId == order.OrderId 
+                    var x = context.OrderDetails.SingleOrDefault(x => x.OrderId == order.OrderId
                     && x.ProductId == order.ProductId);
                     context.OrderDetails.Remove(x);
                     context.SaveChanges();

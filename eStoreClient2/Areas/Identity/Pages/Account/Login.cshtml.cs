@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace eStoreClient2.Areas.Identity.Pages.Account
 {
@@ -82,10 +83,18 @@ namespace eStoreClient2.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
+
+                    // Set user id to session
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+                    HttpContext.Session.SetString("UserId", user.Id);
+                    // Get roles of the user and add them to the session
+                    var roles = await _userManager.GetRolesAsync(user);
+                    HttpContext.Session.SetString("UserRoles", string.Join(",", roles));
+
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

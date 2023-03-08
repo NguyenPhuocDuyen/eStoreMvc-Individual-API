@@ -1,4 +1,5 @@
 ﻿using BusinessObject;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    list = context.Orders.ToList();
+                    list = context.Orders.Include(x => x.OrderDetails).ToList();
                 }
             }
             catch (Exception ex)
@@ -26,6 +27,23 @@ namespace DataAccess.DAO
             return list;
         }
 
+        public static List<Order> GetOrdersByUserId(string userId)
+        {
+            var list = new List<Order>();
+            try
+            {
+                using (var context = new MyDbContext())
+                {
+                    list = context.Orders.Include(x => x.OrderDetails).Where(x=>x.MemberId == userId).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return list;
+        }
+        
         public static Order FindOrderById(int orderId)
         {
             Order order = new();
@@ -33,7 +51,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    order = context.Orders.SingleOrDefault(x => x.OrderId == orderId);
+                    order = context.Orders.Include(x => x.OrderDetails).SingleOrDefault(x => x.OrderId == orderId);
                 }
             }
             catch (Exception ex)

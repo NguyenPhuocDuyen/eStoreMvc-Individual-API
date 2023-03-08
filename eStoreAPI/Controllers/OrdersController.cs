@@ -2,6 +2,7 @@
 using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -32,6 +33,9 @@ namespace eStoreAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Order>> GetOrders() => repository.GetOrders();
 
+        [HttpGet("GetOrdersByUserId/{userId}")]
+        public ActionResult<IEnumerable<Order>> GetOrdersByUserId(string userId) => repository.GetOrdersByUserId(userId);
+
         // GET api/<OrdersController>/5
         [HttpGet("{id}")]
         public ActionResult<Order> Get(int id)
@@ -53,7 +57,9 @@ namespace eStoreAPI.Controllers
             {
                 Order order = new()
                 {
-                    MemberId = userId
+                    MemberId = userId,
+                    RequiredDate = DateTime.Now,
+                    ShippedDate = DateTime.Now
                 };
                 repository.SaveOrder(order);
 

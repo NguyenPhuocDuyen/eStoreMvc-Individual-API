@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.DAO
 {
@@ -17,7 +15,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    list = context.Products.ToList();
+                    list = context.Products.Include(x => x.Category).ToList();
                 }
             }
             catch (Exception ex)
@@ -34,7 +32,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    p = context.Products.SingleOrDefault(x => x.ProductId == propId);
+                    p = context.Products.Include(x => x.Category).SingleOrDefault(x => x.ProductId == propId);
                 }
             }
             catch (Exception ex)

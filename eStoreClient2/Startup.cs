@@ -1,4 +1,4 @@
-using BusinessObject;
+﻿using BusinessObject;
 using eStoreClient2.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,9 +36,31 @@ namespace eStoreClient2
 
             services.AddIdentity<Member, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1); // thời gian khóa tài khoản
+                options.Lockout.MaxFailedAccessAttempts = 3; // số lần đăng nhập thất bại tối đa trước khi khóa tài khoản
+                options.Lockout.AllowedForNewUsers = true; // áp dụng Lockout cho cả tài khoản mới
+            });
+
             services.AddScoped<IEmailSender, EmailSender>();
-            services.AddControllersWithViews();
+            services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddRazorPages();
+
+            services.AddDistributedMemoryCache();           // Đăng ký dịch vụ lưu cache trong bộ nhớ (Session sẽ sử dụng nó)
+            services.AddSession(cfg => {                    // Đăng ký dịch vụ Session
+                cfg.Cookie.Name = "Lab3";             // Đặt tên Session - tên này sử dụng ở Browser (Cookie)
+                cfg.IdleTimeout = new TimeSpan(0, 60, 0);    // Thời gian tồn tại của Session
+            });
+
+            services.AddControllersWithViews();
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,6 +77,12 @@ namespace eStoreClient2
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            using (IServiceScope scope = app.ApplicationServices.CreateScope())
+            {
+                var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                dbInitializer.Initialize();
+            }
+            app.UseSession();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccess.DAO
 {
@@ -17,7 +15,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    list = context.Carts.ToList();
+                    list = context.Carts.Include(x=>x.Product).ToList();
                 }
             }
             catch (Exception ex)
@@ -34,7 +32,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    cart = context.Carts.SingleOrDefault(x => x.CartId == cartId);
+                    cart = context.Carts.Include(x => x.Product).SingleOrDefault(x => x.CartId == cartId);
                 }
             }
             catch (Exception ex)
@@ -51,7 +49,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    list = context.Carts.Include(x=>x.Product).Where(x => x.MemberId == userId).ToList();
+                    list = context.Carts.Include(x => x.Product).Include(x=>x.Product).Where(x => x.MemberId == userId).ToList();
                 }
             }
             catch (Exception ex)
@@ -68,7 +66,7 @@ namespace DataAccess.DAO
             {
                 using (var context = new MyDbContext())
                 {
-                    cart = context.Carts.Include(x => x.Product) .SingleOrDefault(x => x.MemberId == userId
+                    cart = context.Carts.Include(x => x.Product).SingleOrDefault(x => x.MemberId == userId
                     && x.ProductId == productId);
                 }
             }

@@ -1,0 +1,43 @@
+﻿@model IEnumerable<BusinessObject.Cart>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Cart</h1>
+
+<p>
+    <a class="btn btn-primary" asp-action="Index" asp-controller="Products">Back to shop</a>
+</p>
+<p>
+    <a class="btn btn-outline-success" asp-action="OrderProducts" asp-controller="Carts">Buy Prodcuts In Cart</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Product.ProductName)
+            </td>
+            <td>
+                @*<a asp-action="Edit" asp-route-id="@item.CartId">Edit</a> |*@
+                <a asp-action="Delete" asp-route-id="@item.CartId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

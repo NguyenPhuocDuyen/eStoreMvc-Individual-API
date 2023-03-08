@@ -12,6 +12,7 @@ namespace DataAccess.Repository
     public class OrderRepository : IOrderRepository
     {
         public List<Order> GetOrders() => OrderDAO.GetOrders();
+        public List<Order> GetOrdersByUserId(string userId) => OrderDAO.GetOrdersByUserId(userId);
         public Order GetOrderById(int id) => OrderDAO.FindOrderById(id);
         public void SaveOrder(Order order) => OrderDAO.SaveOrder(order);
         public void UpdateOrder(Order order) => OrderDAO.UpdateOrder(order);

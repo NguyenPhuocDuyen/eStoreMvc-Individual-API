@@ -1,0 +1,161 @@
+﻿@model IEnumerable<BusinessObject.Product>
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Index";
+    string userId = Context.Session.GetString("UserId");
+    string userRoles = Context.Session.GetString("UserRoles");
+}
+
+<h1>Product List</h1>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">+ Add Product</a>
+</p>
+<table id="productTable2" class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category.CategoryName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Weight)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UnitInStock)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="productTable"></tbody>
+</table>
+
+@section Scripts {
+    <script>
+        var table;
+        $(document).ready(function () {
+            var userrole = "@(userRoles == null ? "" : userRoles)";
+
+            reloadTable();
+
+            function reloadTable(){
+                table = $('#productTable2').DataTable({
+                    "ajax": {
+                        "url": "https://localhost:44337/api/Products",
+                        "type": "GET",
+                        "contentType": "application/json",
+                        "datatype": "json",
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        { "data": "productName" },
+                        { "data": "category.categoryName" },
+                        { "data": "weight" },
+                        { "data": "unitPrice" },
+                        { "data": "unitInStock" },
+                        { "data": null, render: function(data, type, row) {
+                            var chuoi = '<button class="btn btn-primary" onclick="addProduct(' + row.productId + ')">Add To Cart</button>';
+                            if (userrole=='admin'){
+                                chuoi += ' <button class="btn btn-danger" onclick="deleteProduct(' + row.productId + ')">Delete</button>';
+                            }
+                            return chuoi;
+                        }}
+                    ]
+                });
+            }
+        });
+
+        function deleteProduct(productId) {
+            $.ajax({
+                url: "https://localhost:44337/api/Products/" + productId,
+                type: "DELETE",
+                contentType: "application/json",
+                success: function (result, status, xhr) {
+                    // Refresh the DataTable after deleting the product
+                    table.ajax.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                }
+            });
+        }
+        
+        function addProduct(productId) {
+            var cart = {
+                MemberId: '@userId',
+                ProductId: productId,
+                Quantity: 1 // or any other value
+            };
+
+            $.ajax({
+                url: "https://localhost:44337/api/Carts/AddProductToCart",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(cart),
+                success: function (result, status, xhr) {
+                    // Refresh the DataTable after adding the product to cart
+                    console.log('Thêm thanh cong');
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                }
+            });
+        }
+</script>
+}
+
+@*<script>
+    $(document).ready(function () {
+
+        ShowAllReservation();
+
+        function ShowAllReservation() {
+            $("#productTable").html("");
+            $.ajax({
+                url: "https://localhost:44337/api/Products",
+                type: "GET",
+                contentType: "application/json",
+                success: function (result, status, xhr) {
+                    $.each(result, function (index, value) {
+                        $("tbody").append($("<tr>"));
+                        appendElement = $("tbody tr").last();
+                        appendElement.append($("<td>").html(value["productName"]));
+                        appendElement.append($("<td>").html(value["category"]["categoryName"]));
+                        appendElement.append($("<td>").html(value["weight"]));
+                        appendElement.append($("<td>").html(value["unitPrice"]));
+                        appendElement.append($("<td>").html(value["unitInStock"]));
+                        appendElement.append(
+                            $("<td>").html(
+                                '<a class="btn btn-success" href="/Products/Edit/' + value.productId + '">Update</a> ' +
+                                '<a class="delete btn-danger btn" data-id="' + value.productId + '" href="javascript:void(0)">Delete</a>'
+                            )
+                        );
+                    });
+                },
+                error: function (xhr) {
+                    console.log(xhr);
+                },
+            });
+        }
+
+        $("table").on("click", "a.delete", function () {
+            var productId = this.dataset.id;
+            $.ajax({
+                url: "https://localhost:44337/api/Products/" + productId,
+                type: "DELETE",
+                contentType: "application/json",
+                success: function (result, status, xhr) {
+                    ShowAllReservation();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                }
+            });
+        });
+    });
+</script>*@

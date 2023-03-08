@@ -1,0 +1,153 @@
+﻿@model IEnumerable<BusinessObject.Order>
+@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Index";
+
+    string userId = Context.Session.GetString("UserId");
+    string userRoles = Context.Session.GetString("UserRoles");
+}
+
+<h1>Index</h1>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
+</p>
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Start Date</label>
+    <div class="col-sm-3">
+        <input type="date" class="form-control" id="startDate">
+    </div>
+    <label class="col-sm-2 col-form-label">End Date</label>
+    <div class="col-sm-3">
+        <input type="date" class="form-control" id="endDate">
+    </div>
+    <div class="col-sm-2">
+        <button type="button" class="btn btn-primary" id="searchButton">Search</button>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.RequiredDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ShippedDate)
+            </th>
+            @*<th>
+                @Html.DisplayNameFor(model => model.Member.Id)
+            </th>*@
+            <th>
+                Total
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="orderTable"></tbody>
+</table>
+<script>
+    $(document).ready(function () {
+
+        ShowAllReservation();
+        $("#searchButton").click(function() {
+            var startDate = new Date($("#startDate").val());
+            var endDate = new Date($("#endDate").val());
+            ShowAllReservation(startDate, endDate);
+        });
+
+
+        function ShowAllReservation(startDate, endDate) {
+            $("#orderTable").html("");
+
+            var userRoles = "@(userRoles == "" ? "" : userRoles)";
+            var userId = "@(userId == "" ? "" : userId)";
+
+            var url2 = "https://localhost:44337/api/Orders";
+    
+            // Nếu user không phải là admin, chỉ lấy các đơn hàng có MemberId bằng với userId
+            if (userRoles != "admin") {
+                url2 += "/GetOrdersByUserId/" + userId;
+            }
+
+            $.ajax({
+                url: url2,
+                type: "GET",
+                contentType: "application/json",
+                success: function (result, status, xhr) {
+
+                    result.sort(function(a, b) {
+                        return b.orderDetails.reduce(function(total, detail) {
+                            return total + detail.quantity * detail.unitPrice * (1 - detail.discount);
+                        }, 0) - a.orderDetails.reduce(function(total, detail) {
+                            return total + detail.quantity * detail.unitPrice * (1 - detail.discount);
+                        }, 0);
+                    });
+
+                    if (startDate && endDate) {
+                        // Nếu startDate và endDate được cung cấp, lọc kết quả dựa trên OrderDate
+                        result = result.filter(function(order) {
+                            var orderDate = new Date(order.orderDate);
+                            return orderDate >= startDate && orderDate <= endDate;
+                        });
+                    }
+
+                    var formatDate = function(date) {
+                        return date.toISOString().substring(0, 10);
+                    };
+
+                    $.each(result, function (index, value) {
+                        $("tbody").append($("<tr>"));
+                        appendElement = $("tbody tr").last();
+                        appendElement.append($("<td>").html(value["orderId"]));
+                        appendElement.append($("<td>").html(value["orderDate"]));
+                        appendElement.append($("<td>").html(value["requiredDate"]));
+                        appendElement.append($("<td>").html(value["shippedDate"]));
+                        appendElement.append($("<td>").html(value["unitPrice"]));
+                        //appendElement.append($("<td>").html(value["memberId"]));
+                         // tính tổng giá trị của order
+                        var orderTotal = 0;
+                        $.each(value.orderDetails, function (index, orderDetail) {
+                            orderTotal += orderDetail.quantity * orderDetail.unitPrice * (1 - orderDetail.discount);
+                        });
+                
+                        // hiển thị tổng giá trị của order
+                        appendElement.append($("<td>").html(orderTotal));
+
+                        appendElement.append(
+                            $("<td>").html(
+                                '<a class="btn btn-primary" href="/Orders/Details/' + value.orderId + '">Details</a> ' +
+                                '<a class="delete btn-danger btn" data-id="' + value.orderId + '" href="javascript:void(0)">Delete</a>'
+                            )
+                        );
+
+                    });
+                },
+                error: function (xhr) {
+                    console.log(xhr);
+                },
+            });
+        }
+
+        $("table").on("click", "a.delete", function () {
+            var orderId = this.dataset.id;
+            $.ajax({
+                url: "https://localhost:44337/api/Orders/" + orderId,
+                type: "DELETE",
+                contentType: "application/json",
+                success: function (result, status, xhr) {
+                    ShowAllReservation();
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr);
+                }
+            });
+        });
+    });
+</script>

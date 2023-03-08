@@ -10,6 +10,7 @@ namespace DataAccess.Repository.IRepository
     public interface IOrderRepository
     {
         List<Order> GetOrders();
+        List<Order> GetOrdersByUserId(string userId);
         Order GetOrderById(int id);
         void SaveOrder(Order order);
         void UpdateOrder(Order order);
