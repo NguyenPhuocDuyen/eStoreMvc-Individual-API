@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form id="addOrder" asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="MemberId" class="control-label"></label>
@@ -45,3 +45,42 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $('#addOrder').submit(function (event) {
+                // Ngăn chặn hành vi mặc định của form
+                event.preventDefault();
+
+                // Lấy các giá trị từ các trường form
+                var formData = {
+                    memberId: $('#MemberId').val(),
+                    orderDate: $('#OrderDate').val(),
+                    requiredDate: $('#RequiredDate').val(),
+                    shippedDate: $('#ShippedDate').val()
+                };
+
+                // Gửi yêu cầu AJAX đến máy chủ
+                $.ajax({
+                    type: 'POST',
+                    url: 'https://localhost:44337/api/Orders',
+                    data: JSON.stringify(formData),
+                    contentType: "application/json",
+                    success: function (response) {
+                        // Xử lý kết quả trả về
+                        toastr.success('Create order success!');
+                        // Chuyển hướng về trang danh sách sản phẩm
+                        setTimeout(function() {
+                            window.location.href = "/Orders";
+                        }, 1000);
+                    },
+                    error: function (error) {
+                        // Xử lý lỗi
+                        //toastr.error('Create order success!');
+                    }
+                });
+            });
+        });
+    });
+</script>

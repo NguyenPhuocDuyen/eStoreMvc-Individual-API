@@ -12,7 +12,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form id="createProductForm" asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="CategoryId" class="control-label"></label>
@@ -52,3 +52,44 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+<script>
+$(document).ready(function () {
+    // Gán sự kiện submit form
+    $('#createProductForm').submit(function (e) {
+        e.preventDefault(); // ngăn chặn submit form mặc định
+
+        // Tạo đối tượng chứa giá trị từ form
+        var formData = {
+            CategoryId: $('#CategoryId').val(),
+            ProductName: $('#ProductName').val(),
+            Weight: $('#Weight').val(),
+            UnitPrice: $('#UnitPrice').val(),
+            UnitInStock: $('#UnitInStock').val()
+        };
+
+        // Gửi đối tượng formData đến API bằng phương thức POST và định dạng dữ liệu là JSON
+        $.ajax({
+            type: "POST",
+            url: "https://localhost:44337/api/Products",
+            data: JSON.stringify(formData),
+            contentType: "application/json",
+            success: function (data) {
+                // Xử lý kết quả trả về từ API
+                console.log(data);
+                toastr.success('Create product success!');
+                // Chuyển hướng về trang danh sách sản phẩm
+                setTimeout(function() {
+                    window.location.href = "/products/index";
+                }, 1000);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                // Xử lý lỗi
+                console.log(xhr.responseText);
+            }
+        });
+    });
+});
+</script>
+
+

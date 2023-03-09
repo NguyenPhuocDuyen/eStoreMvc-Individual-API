@@ -70,25 +70,25 @@ namespace eStoreClient2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Products/Create
-        [Authorize(Roles = ApplicationRole.Admim)]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("ProductId,CategoryId,ProductName,Weight,UnitPrice,UnitInStock")] Product product)
-        {
-            if (!ModelState.IsValid)
-            {
-                return RedirectToAction(nameof(Create));
-            }
-            try
-            {
-                response = GobalVariables.WebAPIClient.PostAsJsonAsync("Products", product).Result;
-                if (response.IsSuccessStatusCode) return RedirectToAction(nameof(Index));
-            }
-            catch { }
+        //// POST: Products/Create
+        //[Authorize(Roles = ApplicationRole.Admim)]
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Create([Bind("ProductId,CategoryId,ProductName,Weight,UnitPrice,UnitInStock")] Product product)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return RedirectToAction(nameof(Create));
+        //    }
+        //    try
+        //    {
+        //        response = GobalVariables.WebAPIClient.PostAsJsonAsync("Products", product).Result;
+        //        if (response.IsSuccessStatusCode) return RedirectToAction(nameof(Index));
+        //    }
+        //    catch { }
 
-            return RedirectToAction(nameof(Create));
-        }
+        //    return RedirectToAction(nameof(Create));
+        //}
 
         // GET: Products/Edit/5
         public IActionResult Edit(int? id)
@@ -121,26 +121,26 @@ namespace eStoreClient2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: Products/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, [Bind("ProductId,CategoryId,ProductName,Weight,UnitPrice,UnitInStock")] Product product)
-        {
-            if (id != product.ProductId)
-            {
-                return NotFound();
-            }
+        //// POST: Products/Edit/5
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Edit(int id, [Bind("ProductId,CategoryId,ProductName,Weight,UnitPrice,UnitInStock")] Product product)
+        //{
+        //    if (id != product.ProductId)
+        //    {
+        //        return NotFound();
+        //    }
 
-            try
-            {
-                response = GobalVariables.WebAPIClient.PutAsJsonAsync($"Products/{id}", product).Result;
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch { }
-            return RedirectToAction(nameof(Edit), new { id });
-        }
+        //    try
+        //    {
+        //        response = GobalVariables.WebAPIClient.PutAsJsonAsync($"Products/{id}", product).Result;
+        //        if (response.IsSuccessStatusCode)
+        //        {
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //    }
+        //    catch { }
+        //    return RedirectToAction(nameof(Edit), new { id });
+        //}
     }
 }

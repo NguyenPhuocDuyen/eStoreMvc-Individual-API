@@ -1,7 +1,8 @@
 ﻿@model IEnumerable<BusinessObject.Cart>
-
+@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Index";
+    string userId = Context.Session.GetString("UserId");
 }
 
 <h1>Cart</h1>
@@ -10,7 +11,8 @@
     <a class="btn btn-primary" asp-action="Index" asp-controller="Products">Back to shop</a>
 </p>
 <p>
-    <a class="btn btn-outline-success" asp-action="OrderProducts" asp-controller="Carts">Buy Prodcuts In Cart</a>
+    <a id="buy-cart" class="btn btn-outline-success">Buy Prodcuts In Cart</a>
+</a>
 </p>
 <table class="table">
     <thead>
@@ -25,19 +27,44 @@
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Product.ProductName)
-            </td>
-            <td>
-                @*<a asp-action="Edit" asp-route-id="@item.CartId">Edit</a> |*@
-                <a asp-action="Delete" asp-route-id="@item.CartId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model) {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.ProductName)
+                </td>
+                <td>
+                    @*<a asp-action="Edit" asp-route-id="@item.CartId">Edit</a> |*@
+                    <a asp-action="Delete" asp-route-id="@item.CartId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<script>
+    var userId = "@(userId == null ? "" : userId)";
+    $(document).ready(function() {
+        $('#buy-cart').click(function() {
+            if (userId) {
+                $.ajax({
+                    type: 'GET',
+                    url: 'https://localhost:44337/api/Orders/OrderProducts/' + userId,
+                    success: function(result) {
+                        // handle success response
+                        toastr.success('Order product success!');
+                        // Chuyển hướng về trang danh sách sản phẩm
+                        setTimeout(function() {
+                            window.location.href = "/Orders/index";
+                        }, 1000);
+                    },
+                    error: function(xhr, status, error) {
+                        // handle error response
+                    }
+                });
+            }
+        });
+    });
+</script>

@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form id="eidtProductForm">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="ProductId" />
             <div class="form-group">
@@ -52,3 +52,41 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+<script>
+    $(document).ready(function () {
+        $('#eidtProductForm').submit(function (event) {
+            // Ngăn chặn việc gửi form thông qua chức năng mặc định của trình duyệt
+            event.preventDefault();
+
+            // Lấy dữ liệu từ form và chuyển đổi nó thành đối tượng JSON
+            var formData = $('#eidtProductForm').serializeArray();
+            var jsonData = {};
+            $.each(formData, function (index, input) {
+                jsonData[input.name] = input.value;
+            });
+            var productId = $('#ProductId').val();
+
+            // Gửi yêu cầu Ajax đến API để cập nhật sản phẩm
+            $.ajax({
+                url: 'https://localhost:44337/api/Products/'+productId,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(jsonData),
+                success: function () {
+                    // Thông báo thành công và chuyển hướng đến trang danh sách sản phẩm
+                    //alert('Product updated successfully.');
+                    toastr.success('Update product success!');
+                    // Chuyển hướng về trang danh sách sản phẩm
+                    setTimeout(function() {
+                        window.location.href = "/products/index";
+                    }, 1000);
+                },
+                error: function () {
+                    // Thông báo lỗi
+                    alert('An error occurred while updating the product.');
+                }
+            });
+        });
+    });
+</script>
